@@ -5,11 +5,14 @@ interface FileFolderCardProps {
   isSelected?: boolean;
   isStarred?: boolean;
   layout?: "grid" | "list";
+  isMenuOpen?: boolean;
   onClick?: () => void;
   onOpenMenu?: () => void;
+  onRename?: () => void;
+  onDelete?: () => void;
 }
 
-function FolderIcon({ size = 36 }: { size?: number }) {
+function FolderIcon({ size = 32 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="#2563EB">
       <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
@@ -17,7 +20,7 @@ function FolderIcon({ size = 36 }: { size?: number }) {
   );
 }
 
-function FileIcon({ size = 36 }: { size?: number }) {
+function FileIcon({ size = 32 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5">
       <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
@@ -36,6 +39,49 @@ function StarIcon() {
   );
 }
 
+function MenuDotsIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="5" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="12" cy="19" r="1.5" />
+    </svg>
+  );
+}
+
+function DropdownMenu({
+  onRename,
+  onDelete,
+}: {
+  onRename?: () => void;
+  onDelete?: () => void;
+}) {
+  return (
+    <div className="absolute right-0 top-full z-10 mt-1 min-w-[120px] overflow-hidden rounded-md border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRename?.();
+        }}
+        className="block w-full px-3 py-2 text-left text-body-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
+      >
+        Rename
+      </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete?.();
+        }}
+        className="block w-full px-3 py-2 text-left text-body-sm text-error hover:bg-red-50 dark:hover:bg-red-950"
+      >
+        Delete
+      </button>
+    </div>
+  );
+}
+
 export default function FileFolderCard({
   name,
   type,
@@ -43,90 +89,88 @@ export default function FileFolderCard({
   isSelected = false,
   isStarred = false,
   layout = "grid",
+  isMenuOpen = false,
   onClick,
   onOpenMenu,
+  onRename,
+  onDelete,
 }: FileFolderCardProps) {
-  const tintClass =
-    type === "folder"
-      ? "bg-primary-50/60 dark:bg-primary-500/5"
-      : "bg-gray-50 dark:bg-gray-800/60";
+  const borderClass = isSelected
+    ? "border-primary-500 bg-primary-50 dark:bg-primary-500/10"
+    : "border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800";
 
   if (layout === "list") {
     return (
-      <button
-        type="button"
-        onClick={onClick}
-        className={`group relative flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors ${
-          isSelected
-            ? "border-primary-500 bg-primary-50 dark:bg-primary-500/10"
-            : `border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:bg-gray-800 ${tintClass}`
-        }`}
-      >
-        {type === "folder" ? <FolderIcon size={24} /> : <FileIcon size={24} />}
-        <span className="flex-1 truncate text-body-sm font-medium text-gray-900 dark:text-gray-50">
-          {name}
-        </span>
-        <span className="text-caption text-gray-500 dark:text-gray-400">
-          {meta}
-        </span>
-        {isStarred && <StarIcon />}
-        {onOpenMenu && (
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenMenu();
-            }}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-          >
-            ⋮
+      <div className="relative">
+        <button
+          type="button"
+          onClick={onClick}
+          className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors ${borderClass}`}
+        >
+          {type === "folder" ? <FolderIcon size={20} /> : <FileIcon size={20} />}
+          <span className="flex-1 truncate text-body-sm font-medium text-gray-900 dark:text-gray-50">
+            {name}
           </span>
-        )}
-      </button>
+          {isStarred && <StarIcon />}
+          <span className="text-caption text-gray-500 dark:text-gray-400">
+            {meta}
+          </span>
+          {onOpenMenu && (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenMenu();
+              }}
+              className="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
+              <MenuDotsIcon />
+            </span>
+          )}
+        </button>
+        {isMenuOpen && <DropdownMenu onRename={onRename} onDelete={onDelete} />}
+      </div>
     );
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`group relative flex flex-col items-start gap-3 rounded-lg border p-4 text-left transition-colors ${
-        isSelected
-          ? "border-primary-500 bg-primary-50 dark:bg-primary-500/10"
-          : `border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:bg-gray-800 ${tintClass}`
-      }`}
-    >
-      {isStarred && (
-        <span className="absolute right-3 top-3">
-          <StarIcon />
-        </span>
-      )}
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onClick}
+        className={`group relative flex w-full cursor-pointer flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors ${borderClass}`}
+      >
+        <div className="flex w-full items-start justify-between">
+          {type === "folder" ? <FolderIcon /> : <FileIcon />}
+          <div className="flex items-center gap-1">
+            {isStarred && <StarIcon />}
+            {onOpenMenu && (
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenMenu();
+                }}
+                className="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <MenuDotsIcon />
+              </span>
+            )}
+          </div>
+        </div>
 
-      {onOpenMenu && (
-        <span
-          role="button"
-          tabIndex={0}
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenMenu();
-          }}
-          className="absolute right-3 top-3 hidden text-gray-400 hover:text-gray-600 group-hover:block dark:hover:text-gray-200"
-        >
-          ⋮
-        </span>
-      )}
-
-      {type === "folder" ? <FolderIcon /> : <FileIcon />}
-
-      <div className="flex flex-col gap-0.5">
-        <span className="text-body-sm font-medium text-gray-900 dark:text-gray-50">
-          {name}
-        </span>
-        <span className="text-caption text-gray-500 dark:text-gray-400">
-          {meta}
-        </span>
-      </div>
-    </button>
+        <div className="flex flex-col gap-0.5">
+          <span className="truncate text-body-sm font-medium text-gray-900 dark:text-gray-50">
+            {name}
+          </span>
+          <span className="truncate text-caption text-gray-500 dark:text-gray-400">
+            {meta}
+          </span>
+        </div>
+      </button>
+      {isMenuOpen && <DropdownMenu onRename={onRename} onDelete={onDelete} />}
+    </div>
   );
 }

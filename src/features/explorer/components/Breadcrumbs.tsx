@@ -23,7 +23,7 @@ export default function Breadcrumbs({ rootId, items, onNavigate }: BreadcrumbsPr
       <button
         type="button"
         onClick={() => onNavigate(rootId)}
-        className="flex items-center hover:text-gray-700 dark:hover:text-gray-200"
+        className="flex cursor-pointer items-center hover:text-gray-700 dark:hover:text-gray-200"
         aria-label="Home"
       >
         <HomeIcon />
@@ -42,7 +42,7 @@ export default function Breadcrumbs({ rootId, items, onNavigate }: BreadcrumbsPr
               <button
                 type="button"
                 onClick={() => onNavigate(item.id)}
-                className="hover:text-gray-700 dark:hover:text-gray-200"
+                className="cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
               >
                 {item.name}
               </button>

@@ -16,6 +16,9 @@ interface DropdownProps {
   trigger?: ReactNode;
   triggerClassName?: string;
   hideDefaultChevron?: boolean;
+  menuClassName?: string;
+  optionClassName?: (isSelected: boolean) => string;
+  footer?: ReactNode;
 }
 
 export default function Dropdown({
@@ -25,6 +28,9 @@ export default function Dropdown({
   trigger,
   triggerClassName,
   hideDefaultChevron = false,
+  menuClassName,
+  optionClassName,
+  footer,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -64,25 +70,38 @@ export default function Dropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 z-40 mt-1 min-w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-900">
-          {options.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
-              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-body-sm whitespace-nowrap ${
-                option.value === value
-                  ? "bg-primary-50 text-primary-600 dark:bg-primary-500/10"
-                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
-              }`}
-            >
-              {option.icon}
-              {option.label}
-            </button>
-          ))}
+        <div
+          className={
+            menuClassName ??
+            "absolute left-0 z-40 mt-1 min-w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-900"
+          }
+        >
+          {options.map((option) => {
+            const isSelected = option.value === value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+                className={
+                  optionClassName
+                    ? optionClassName(isSelected)
+                    : `flex w-full items-center gap-2 px-3 py-2 text-left text-body-sm whitespace-nowrap ${
+                        isSelected
+                          ? "bg-primary-50 text-primary-600 dark:bg-primary-500/10"
+                          : "text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
+                      }`
+                }
+              >
+                {option.icon}
+                {option.label}
+              </button>
+            );
+          })}
+          {footer}
         </div>
       )}
     </div>

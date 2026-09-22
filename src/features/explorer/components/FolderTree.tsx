@@ -1,8 +1,6 @@
 "use client";
 
 import { useAppSelector } from "@/store/hooks";
-import { useAppDispatch } from "@/store/hooks";
-import { selectFolder } from "@/features/workspace/workspaceSlice";
 import FolderTreeItem from "./FolderTreeItem";
 import type { TreeFolder } from "./FolderTreeItem";
 import type { NodesById } from "@/features/workspace/workspace.types";
@@ -25,8 +23,13 @@ function buildTree(nodes: NodesById, folderId: string): TreeFolder {
   };
 }
 
-export default function FolderTree() {
-  const dispatch = useAppDispatch();
+interface FolderTreeProps {
+  onSelect: (folderId: string) => void;
+  onRename: (folderId: string) => void;
+  onDelete: (folderId: string) => void;
+}
+
+export default function FolderTree({ onSelect, onRename, onDelete }: FolderTreeProps) {
   const nodes = useAppSelector((state) => state.workspace.nodes);
   const selectedFolderId = useAppSelector(
     (state) => state.workspace.selectedFolderId
@@ -40,11 +43,18 @@ export default function FolderTree() {
   const tree = buildTree(nodes, workspace.rootFolderId);
 
   return (
-    <FolderTreeItem
-      folder={tree}
-      depth={0}
-      selectedFolderId={selectedFolderId}
-      onSelect={(folderId) => dispatch(selectFolder({ folderId }))}
-    />
+    <div className="flex flex-col gap-0.5">
+      {tree.children.map((child) => (
+        <FolderTreeItem
+          key={child.id}
+          folder={child}
+          depth={0}
+          selectedFolderId={selectedFolderId}
+          onSelect={onSelect}
+          onRename={onRename}
+          onDelete={onDelete}
+        />
+      ))}
+    </div>
   );
 }

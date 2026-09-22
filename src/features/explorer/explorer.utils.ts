@@ -100,6 +100,49 @@ export function countNestedItems(
   return { folders, files };
 }
 
+export function formatDateTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+export function getAvailableName(
+  nodes: NodesById,
+  parentId: string,
+  desiredName: string
+): string {
+  const parent = nodes[parentId];
+  if (!parent || parent.type !== "folder") return desiredName;
+
+  const siblingNames = new Set(
+    parent.childrenIds
+      .map((id) => nodes[id])
+      .filter((node) => node && !node.isDeleted)
+      .map((node) => node!.name.toLowerCase())
+  );
+
+  if (!siblingNames.has(desiredName.toLowerCase())) {
+    return desiredName;
+  }
+
+  const dotIndex = desiredName.lastIndexOf(".");
+  const base = dotIndex > 0 ? desiredName.slice(0, dotIndex) : desiredName;
+  const extension = dotIndex > 0 ? desiredName.slice(dotIndex) : "";
+
+  let counter = 1;
+  let candidate = `${base} (${counter})${extension}`;
+  while (siblingNames.has(candidate.toLowerCase())) {
+    counter += 1;
+    candidate = `${base} (${counter})${extension}`;
+  }
+
+  return candidate;
+}
+
 export function getNodePath(
   nodes: NodesById,
   nodeId: string,

@@ -6,6 +6,27 @@ import type {
   WorkspaceState,
 } from "./workspace.types";
 
+function makeFolder(
+  name: string,
+  parentId: string,
+  workspaceId: string
+): FolderNode {
+  const now = Date.now();
+  return {
+    id: crypto.randomUUID(),
+    name,
+    type: "folder",
+    parentId,
+    workspaceId,
+    isStarred: false,
+    isDeleted: false,
+    deletedAt: null,
+    createdAt: now,
+    updatedAt: now,
+    childrenIds: [],
+  };
+}
+
 function createInitialState(): WorkspaceState {
   const workspaceId = crypto.randomUUID();
   const rootFolderId = crypto.randomUUID();
@@ -25,6 +46,32 @@ function createInitialState(): WorkspaceState {
     childrenIds: [],
   };
 
+  const nodes: Record<string, FolderNode> = { [rootFolderId]: rootFolder };
+
+  const projects = makeFolder("Projects", rootFolderId, workspaceId);
+  const personal = makeFolder("Personal", rootFolderId, workspaceId);
+  const documents = makeFolder("Documents", rootFolderId, workspaceId);
+  const assets = makeFolder("Assets", rootFolderId, workspaceId);
+  rootFolder.childrenIds = [projects.id, personal.id, documents.id, assets.id];
+  nodes[projects.id] = projects;
+  nodes[personal.id] = personal;
+  nodes[documents.id] = documents;
+  nodes[assets.id] = assets;
+
+  const webbly = makeFolder("Webbly", projects.id, workspaceId);
+  const mobileApp = makeFolder("Mobile App", projects.id, workspaceId);
+  projects.childrenIds = [webbly.id, mobileApp.id];
+  nodes[webbly.id] = webbly;
+  nodes[mobileApp.id] = mobileApp;
+
+  const frontend = makeFolder("frontend", webbly.id, workspaceId);
+  const backend = makeFolder("backend", webbly.id, workspaceId);
+  const docs = makeFolder("docs", webbly.id, workspaceId);
+  webbly.childrenIds = [frontend.id, backend.id, docs.id];
+  nodes[frontend.id] = frontend;
+  nodes[backend.id] = backend;
+  nodes[docs.id] = docs;
+
   return {
     workspaces: {
       [workspaceId]: {
@@ -36,10 +83,8 @@ function createInitialState(): WorkspaceState {
       },
     },
     activeWorkspaceId: workspaceId,
-    nodes: {
-      [rootFolderId]: rootFolder,
-    },
-    selectedFolderId: rootFolderId,
+    nodes,
+    selectedFolderId: webbly.id,
     openFileId: null,
   };
 }
@@ -48,6 +93,10 @@ const workspaceSlice = createSlice({
   name: "workspace",
   initialState: createInitialState(),
   reducers: {
+    hydrate: (_state, action: PayloadAction<WorkspaceState>) => {
+      return action.payload;
+    },
+
     createWorkspace: (
       state,
       action: PayloadAction<{ name: string; description: string }>
@@ -109,11 +158,21 @@ const workspaceSlice = createSlice({
 
     createNode: (
       state,
-      action: PayloadAction<{ parentId: string; name: string; type: NodeType }>
+      action: PayloadAction<{
+        parentId: string;
+        name: string;
+        type: NodeType;
+        content?: string;
+      }>
     ) => {
-      const { parentId, name, type } = action.payload;
+      const { parentId, name, type, content } = action.payload;
       const parent = state.nodes[parentId];
-      if (!parent || parent.type !== "folder") return;
+      if (
+        !parent ||
+        parent.type !== "folder" ||
+        parent.workspaceId !== state.activeWorkspaceId
+      )
+        return;
 
       const trimmedName = name.trim();
       if (!trimmedName) return;
@@ -157,7 +216,7 @@ const workspaceSlice = createSlice({
           deletedAt: null,
           createdAt: now,
           updatedAt: now,
-          content: "",
+          content: content ?? "",
         };
       }
 
@@ -170,7 +229,7 @@ const workspaceSlice = createSlice({
     ) => {
       const { nodeId, name } = action.payload;
       const node = state.nodes[nodeId];
-      if (!node) return;
+      if (!node || node.workspaceId !== state.activeWorkspaceId) return;
 
       const trimmedName = name.trim();
       if (!trimmedName) return;
@@ -200,7 +259,12 @@ const workspaceSlice = createSlice({
       action: PayloadAction<{ nodeId: string; content: string }>
     ) => {
       const node = state.nodes[action.payload.nodeId];
-      if (!node || node.type !== "file") return;
+      if (
+        !node ||
+        node.type !== "file" ||
+        node.workspaceId !== state.activeWorkspaceId
+      )
+        return;
 
       node.content = action.payload.content;
       node.updatedAt = Date.now();
@@ -208,14 +272,14 @@ const workspaceSlice = createSlice({
 
     toggleStar: (state, action: PayloadAction<{ nodeId: string }>) => {
       const node = state.nodes[action.payload.nodeId];
-      if (!node) return;
+      if (!node || node.workspaceId !== state.activeWorkspaceId) return;
 
       node.isStarred = !node.isStarred;
     },
 
     deleteNode: (state, action: PayloadAction<{ nodeId: string }>) => {
       const node = state.nodes[action.payload.nodeId];
-      if (!node) return;
+      if (!node || node.workspaceId !== state.activeWorkspaceId) return;
 
       const now = Date.now();
       const idsToDelete: string[] = [];
@@ -261,7 +325,7 @@ const workspaceSlice = createSlice({
 
     restoreNode: (state, action: PayloadAction<{ nodeId: string }>) => {
       const node = state.nodes[action.payload.nodeId];
-      if (!node) return;
+      if (!node || node.workspaceId !== state.activeWorkspaceId) return;
 
       node.isDeleted = false;
       node.deletedAt = null;
@@ -279,7 +343,7 @@ const workspaceSlice = createSlice({
       action: PayloadAction<{ nodeId: string }>
     ) => {
       const node = state.nodes[action.payload.nodeId];
-      if (!node) return;
+      if (!node || node.workspaceId !== state.activeWorkspaceId) return;
 
       const idsToRemove: string[] = [];
       const collect = (id: string) => {
@@ -307,7 +371,9 @@ const workspaceSlice = createSlice({
 
     emptyTrash: (state) => {
       const trashedIds = Object.keys(state.nodes).filter(
-        (id) => state.nodes[id].isDeleted
+        (id) =>
+          state.nodes[id].isDeleted &&
+          state.nodes[id].workspaceId === state.activeWorkspaceId
       );
       trashedIds.forEach((id) => {
         delete state.nodes[id];
@@ -315,11 +381,29 @@ const workspaceSlice = createSlice({
     },
 
     selectFolder: (state, action: PayloadAction<{ folderId: string }>) => {
-      state.selectedFolderId = action.payload.folderId;
+      const folder = state.nodes[action.payload.folderId];
+      if (
+        !folder ||
+        folder.type !== "folder" ||
+        folder.workspaceId !== state.activeWorkspaceId ||
+        folder.isDeleted
+      )
+        return;
+
+      state.selectedFolderId = folder.id;
     },
 
     openFile: (state, action: PayloadAction<{ fileId: string }>) => {
-      state.openFileId = action.payload.fileId;
+      const file = state.nodes[action.payload.fileId];
+      if (
+        !file ||
+        file.type !== "file" ||
+        file.workspaceId !== state.activeWorkspaceId ||
+        file.isDeleted
+      )
+        return;
+
+      state.openFileId = file.id;
     },
 
     closeFile: (state) => {
@@ -329,6 +413,7 @@ const workspaceSlice = createSlice({
 });
 
 export const {
+  hydrate,
   createWorkspace,
   switchWorkspace,
   renameWorkspace,
