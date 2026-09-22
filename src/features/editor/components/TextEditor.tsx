@@ -293,7 +293,7 @@ export default function TextEditor({
               onClick={() => setViewMode("preview")}
               className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-caption font-medium transition-colors ${
                 viewMode === "preview"
-                  ? "bg-white text-primary-500 shadow-xs font-semibold dark:bg-gray-700 dark:text-primary-400"
+                  ? "bg-white text-primary-500 shadow-xs font-semibold dark:bg-gray-700 dark:text-info"
                   : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
             >
@@ -305,7 +305,7 @@ export default function TextEditor({
               onClick={() => setViewMode("edit")}
               className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-caption font-medium transition-colors ${
                 viewMode === "edit"
-                  ? "bg-white text-primary-500 shadow-xs font-semibold dark:bg-gray-700 dark:text-primary-400"
+                  ? "bg-white text-primary-500 shadow-xs font-semibold dark:bg-gray-700 dark:text-info"
                   : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
             >
@@ -329,7 +329,7 @@ export default function TextEditor({
             onClick={() => { setAiOpen((v) => !v); resetAi(); }}
             className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-caption font-medium transition-colors ${
               aiOpen
-                ? "border-primary-500 bg-primary-50 text-primary-500 dark:border-primary-500/50 dark:bg-primary-500/10 dark:text-primary-400"
+                ? "border-primary-500 bg-primary-50 text-primary-500 dark:border-primary-500/50 dark:bg-primary-500/10 dark:text-info"
                 : "border-gray-200 text-gray-500 hover:border-primary-400 hover:text-primary-500 dark:border-gray-700 dark:hover:border-primary-400 dark:hover:text-primary-400"
             }`}
           >
@@ -357,7 +357,7 @@ export default function TextEditor({
               <span className="text-body-sm font-semibold text-gray-900 dark:text-gray-50">
                 AI Assistant
               </span>
-              <span className="rounded-full bg-primary-50 px-2 py-0.5 text-caption font-medium text-primary-500 dark:bg-primary-500/10 dark:text-primary-400">
+              <span className="rounded-full bg-primary-50 px-2 py-0.5 text-caption font-medium text-primary-500 dark:bg-primary-500/10 dark:text-info">
                 Gemini
               </span>
               <button
@@ -384,7 +384,7 @@ export default function TextEditor({
                       onClick={() => runAi(action.id)}
                       className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-body-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                         activeAction === action.id && aiStreaming
-                          ? "bg-primary-50 font-medium text-primary-500 dark:bg-primary-500/15 dark:text-primary-400"
+                          ? "bg-primary-50 font-medium text-primary-500 dark:bg-primary-500/15 dark:text-info"
                           : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                       }`}
                     >
@@ -606,24 +606,24 @@ export default function TextEditor({
                 <button
                   type="button"
                   onClick={() => setRulesOpen(true)}
-                  className="text-[10px] font-bold text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 hover:underline transition-colors"
+                  className="text-[10px] font-bold text-primary-500 hover:text-primary-600 dark:text-info dark:hover:text-primary-100 hover:underline transition-colors"
                 >
                   View Details
                 </button>
               </div>
               <div className="rounded-xl border border-gray-200/90 bg-gray-50/80 p-3 space-y-2.5 text-[12px] font-mono dark:border-gray-800 dark:bg-gray-800/40">
                 <div>
-                  <div className="font-bold text-primary-500 dark:text-primary-400"># Heading 1</div>
-                  <div className="font-bold text-primary-500 dark:text-primary-400">## Heading 2</div>
+                  <div className="font-bold text-primary-500 dark:text-info"># Heading 1</div>
+                  <div className="font-bold text-primary-500 dark:text-info">## Heading 2</div>
                   <p className="text-[11px] text-gray-500 font-sans mt-0.5">হেডিংস (#, ##) নীল বোল্ড রঙে দেখাবে</p>
                 </div>
                 <div className="border-t border-gray-200/70 dark:border-gray-700/70 pt-2">
-                  <div className="text-primary-500 dark:text-primary-400 font-bold">- [x] Done</div>
+                  <div className="text-primary-500 dark:text-info font-bold">- [x] Done</div>
                   <div className="text-gray-400 dark:text-gray-500">- [ ] Todo</div>
                   <p className="text-[11px] text-gray-500 font-sans mt-0.5">চেকবক্স (- [x], - [ ]) চিহ্নিত থাকবে</p>
                 </div>
                 <div className="border-t border-gray-200/70 dark:border-gray-700/70 pt-2">
-                  <div className="text-primary-500 dark:text-primary-400 underline">[title](url)</div>
+                  <div className="text-primary-500 dark:text-info underline">[title](url)</div>
                   <p className="text-[11px] text-gray-500 font-sans mt-0.5">লিঙ্কগুলো নীল ও আন্ডারলাইনড ক্লিকেবল</p>
                 </div>
                 <div className="border-t border-gray-200/70 dark:border-gray-700/70 pt-2">
@@ -666,15 +666,15 @@ export default function TextEditor({
           <div className="space-y-4">
             <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4 space-y-3 font-mono text-[13px] dark:border-gray-700 dark:bg-gray-800/50">
               <div>
-                <p className="font-bold text-primary-500 dark:text-primary-400"># Project Notes</p>
-                <p className="font-bold text-primary-500 dark:text-primary-400">## Ideas</p>
+                <p className="font-bold text-primary-500 dark:text-info"># Project Notes</p>
+                <p className="font-bold text-primary-500 dark:text-info">## Ideas</p>
                 <p className="text-[12px] font-sans text-gray-600 dark:text-gray-300 mt-1">
                   • <strong>হেডিংস</strong>: <code>#</code> বা <code>##</code> দিলে নীল বোল্ড রঙে দেখাবে।
                 </p>
               </div>
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                <p className="text-primary-500 dark:text-primary-400 font-bold">- [x] Design main workspace UI</p>
+                <p className="text-primary-500 dark:text-info font-bold">- [x] Design main workspace UI</p>
                 <p className="text-gray-400 dark:text-gray-500">- [ ] Implement search</p>
                 <p className="text-[12px] font-sans text-gray-600 dark:text-gray-300 mt-1">
                   • <strong>চেকবক্স</strong>: <code>- [x]</code> এবং <code>- [ ]</code> দিয়ে সম্পন্ন ও অসম্পন্ন কাজ চিহ্নিত থাকবে।
@@ -682,7 +682,7 @@ export default function TextEditor({
               </div>
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                <p className="text-primary-500 dark:text-primary-400 underline">[Design Reference](https://ui.shadcn.com)</p>
+                <p className="text-primary-500 dark:text-info underline">[Design Reference](https://ui.shadcn.com)</p>
                 <p className="text-[12px] font-sans text-gray-600 dark:text-gray-300 mt-1">
                   • <strong>লিঙ্ক</strong>: <code>[link](url)</code> নীল ও আন্ডারলাইনড ক্লিকেবল আকারে থাকবে।
                 </p>
