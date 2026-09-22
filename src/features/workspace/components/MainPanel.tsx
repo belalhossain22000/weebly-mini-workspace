@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { selectFolder, toggleStar } from "@/features/workspace/workspaceSlice";
 import {
@@ -8,6 +8,7 @@ import {
   formatBytes,
   formatRelativeTime,
 } from "@/features/explorer/explorer.utils";
+import { useIsClient } from "@/lib/useIsClient";
 import Breadcrumbs from "@/features/explorer/components/Breadcrumbs";
 import FileFolderCard from "@/features/explorer/components/FileFolderCard";
 import EmptyState from "@/components/shared/EmptyState";
@@ -95,12 +96,7 @@ export default function MainPanel({
   );
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
+  const isMounted = useIsClient();
 
   if (!workspace) return null;
 
@@ -121,23 +117,24 @@ export default function MainPanel({
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto bg-zinc-50 dark:bg-black">
-      <div className="flex items-center justify-between border-b border-gray-100 px-6 py-3 dark:border-gray-800">
+      <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 sm:px-6 dark:border-gray-800">
         <Breadcrumbs
           rootId={workspace.rootFolderId}
           items={breadcrumbPath}
           onNavigate={(id) => dispatch(selectFolder({ folderId: id }))}
         />
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button variant="primary" onClick={onCreate}>
-            + New
+            <span className="hidden sm:inline">+ New</span>
+            <span className="sm:hidden">+</span>
           </Button>
-          <div className="flex items-center rounded-md border border-gray-200 dark:border-gray-700">
+          <div className="hidden items-center rounded-md border border-gray-200 sm:flex dark:border-gray-700">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
               aria-label="Grid view"
-              className={`flex h-9 w-9 items-center justify-center rounded-l-md ${
+              className={`flex h-10 w-10 items-center justify-center rounded-l-md sm:h-9 sm:w-9 ${
                 viewMode === "grid"
                   ? "bg-primary-50 text-primary-600 dark:bg-primary-500/10"
                   : "text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -149,7 +146,7 @@ export default function MainPanel({
               type="button"
               onClick={() => setViewMode("list")}
               aria-label="List view"
-              className={`flex h-9 w-9 items-center justify-center rounded-r-md border-l border-gray-200 dark:border-gray-700 ${
+              className={`flex h-10 w-10 items-center justify-center rounded-r-md border-l border-gray-200 sm:h-9 sm:w-9 dark:border-gray-700 ${
                 viewMode === "list"
                   ? "bg-primary-50 text-primary-600 dark:bg-primary-500/10"
                   : "text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -161,7 +158,7 @@ export default function MainPanel({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-6 p-6">
+      <div className="flex flex-1 flex-col gap-5 p-4 sm:gap-6 sm:p-6">
         <div className="flex items-center gap-3">
           <FolderIcon size={40} />
           <div>
@@ -191,7 +188,7 @@ export default function MainPanel({
           <div
             className={
               viewMode === "grid"
-                ? "grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+                ? "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
                 : "flex flex-col gap-1"
             }
           >

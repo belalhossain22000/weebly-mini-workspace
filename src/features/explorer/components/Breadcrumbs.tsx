@@ -19,11 +19,11 @@ function HomeIcon() {
 
 export default function Breadcrumbs({ rootId, items, onNavigate }: BreadcrumbsProps) {
   return (
-    <nav className="flex items-center gap-2 text-body-sm text-gray-500 dark:text-gray-400">
+    <nav className="flex min-w-0 max-w-full items-center gap-2 overflow-x-auto text-body-sm text-gray-500 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden dark:text-gray-400">
       <button
         type="button"
         onClick={() => onNavigate(rootId)}
-        className="flex cursor-pointer items-center hover:text-gray-700 dark:hover:text-gray-200"
+        className="flex shrink-0 cursor-pointer items-center hover:text-gray-700 dark:hover:text-gray-200"
         aria-label="Home"
       >
         <HomeIcon />
@@ -32,17 +32,17 @@ export default function Breadcrumbs({ rootId, items, onNavigate }: BreadcrumbsPr
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
-          <div key={item.id} className="flex items-center gap-2">
+          <div key={item.id} className="flex shrink-0 items-center gap-2">
             <span className="text-gray-300 dark:text-gray-600">/</span>
             {isLast ? (
-              <span className="font-medium text-gray-900 dark:text-gray-50">
+              <span className="whitespace-nowrap font-medium text-gray-900 dark:text-gray-50">
                 {item.name}
               </span>
             ) : (
               <button
                 type="button"
                 onClick={() => onNavigate(item.id)}
-                className="cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
+                className="cursor-pointer whitespace-nowrap hover:text-gray-700 dark:hover:text-gray-200"
               >
                 {item.name}
               </button>

@@ -8,6 +8,7 @@ import {
   emptyTrash,
 } from "@/features/workspace/workspaceSlice";
 import { formatBytes, formatRelativeTime } from "@/features/explorer/explorer.utils";
+import { useIsClient } from "@/lib/useIsClient";
 import EmptyState from "@/components/shared/EmptyState";
 import Button from "@/components/ui/Button";
 import { FolderIcon, FileIcon } from "@/components/ui/FileFolderIcon";
@@ -40,15 +41,13 @@ export default function TrashView() {
   );
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [confirmEmptyTrash, setConfirmEmptyTrash] = useState(false);
+  const isMounted = useIsClient();
 
-  // Only show top-level trashed nodes (whose parent is NOT also trashed),
-  // to avoid duplicates when a whole folder tree is deleted.
   const trashedNodes = Object.values(nodes).filter((node) => {
     if (node.workspaceId !== activeWorkspaceId) return false;
     if (!node.isDeleted) return false;
     if (!node.parentId) return true;
     const parent = nodes[node.parentId];
-    // Show the node only if its parent is not deleted (i.e. it is the root of the deleted subtree)
     return !parent || !parent.isDeleted;
   });
 
@@ -56,8 +55,7 @@ export default function TrashView() {
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto bg-zinc-50 dark:bg-black">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-6 py-3 dark:border-gray-800">
+      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 sm:px-6 dark:border-gray-800">
         <div className="flex items-center gap-2">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-gray-500">
             <polyline points="3 6 5 6 21 6" />
@@ -77,9 +75,8 @@ export default function TrashView() {
         )}
       </div>
 
-      {/* Confirm empty-trash banner */}
       {confirmEmptyTrash && (
-        <div className="flex items-center justify-between gap-4 border-b border-red-200 bg-red-50 px-6 py-3 dark:border-red-900 dark:bg-red-950/30">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-3 sm:gap-4 sm:px-6 dark:border-red-900 dark:bg-red-950/30">
           <p className="text-body-sm text-red-700 dark:text-red-300">
             Permanently delete all {trashedNodes.length} item{trashedNodes.length !== 1 ? "s" : ""}? This cannot be undone.
           </p>
@@ -105,7 +102,7 @@ export default function TrashView() {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col gap-6 p-6">
+      <div className="flex flex-1 flex-col gap-5 p-4 sm:gap-6 sm:p-6">
         <div>
           <h1 className="text-heading-3 text-gray-900 dark:text-gray-50">Trash</h1>
           <p className="mt-1 text-body-sm text-gray-500 dark:text-gray-400">
@@ -123,34 +120,32 @@ export default function TrashView() {
           <div className="flex flex-col gap-1">
             {trashedNodes.map((node) => (
               <div key={node.id} className="relative">
-                <div className="group flex w-full items-center gap-3 rounded-lg border border-gray-100 bg-white px-3 py-2.5 text-left transition-colors dark:border-gray-800 dark:bg-gray-900">
+                <div className="group flex w-full items-center gap-2 rounded-lg border border-gray-100 bg-white px-3 py-2.5 text-left transition-colors sm:gap-3 dark:border-gray-800 dark:bg-gray-900">
                   <span className="opacity-50">
                     {node.type === "folder" ? <FolderIcon /> : <FileIcon />}
                   </span>
                   <span className="flex-1 truncate text-body-sm font-medium text-gray-500 line-through dark:text-gray-400">
                     {node.name}
                   </span>
-                  <span className="shrink-0 text-caption text-gray-400">
+                  <span className="hidden shrink-0 text-caption text-gray-400 sm:inline">
                     {node.type === "file"
                       ? formatBytes(node.content.length)
                       : `${node.childrenIds.length} item${node.childrenIds.length !== 1 ? "s" : ""}`}
                   </span>
-                  <span className="w-24 shrink-0 text-right text-caption text-gray-400">
-                    {node.deletedAt ? formatRelativeTime(node.deletedAt) : ""}
+                  <span className="hidden w-24 shrink-0 text-right text-caption text-gray-400 sm:inline">
+                    {isMounted && node.deletedAt ? formatRelativeTime(node.deletedAt) : ""}
                   </span>
 
-                  {/* Restore button */}
                   <button
                     type="button"
                     title="Restore"
                     onClick={() => dispatch(restoreNode({ nodeId: node.id }))}
-                    className="flex items-center gap-1 rounded-md px-2 py-1 text-caption font-medium text-primary-600 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-950/40"
+                    className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-caption font-medium text-primary-600 hover:bg-primary-50 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 dark:text-primary-400 dark:hover:bg-primary-950/40"
                   >
                     <RestoreIcon />
-                    Restore
+                    <span className="hidden sm:inline">Restore</span>
                   </button>
 
-                  {/* More options */}
                   <span
                     role="button"
                     tabIndex={0}
@@ -164,7 +159,7 @@ export default function TrashView() {
                         setOpenMenuId((c) => (c === node.id ? null : node.id));
                       }
                     }}
-                    className="cursor-pointer text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-gray-600 dark:hover:text-gray-200"
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center text-gray-400 hover:text-gray-600 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 dark:hover:text-gray-200"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                       <circle cx="12" cy="5" r="1.5" />

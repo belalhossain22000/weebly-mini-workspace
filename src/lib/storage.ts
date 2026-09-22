@@ -19,8 +19,5 @@ export function saveWorkspaceState(state: WorkspaceState): void {
 
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // localStorage may be unavailable (private mode, quota exceeded).
-    // Persistence is a nice-to-have, so failures are silently ignored.
-  }
+  } catch {}
 }

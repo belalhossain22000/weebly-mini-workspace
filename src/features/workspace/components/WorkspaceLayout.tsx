@@ -42,6 +42,7 @@ export default function WorkspaceLayout() {
   );
 
   const [activeNav, setActiveNav] = useState("explorer");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
@@ -56,7 +57,6 @@ export default function WorkspaceLayout() {
     openFile && openFile.type === "file" && draftContent !== openFile.content
   );
 
-  // Warn the browser before reload/close when there are unsaved changes.
   useEffect(() => {
     if (!isDirty) return;
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -66,13 +66,13 @@ export default function WorkspaceLayout() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  useEffect(() => {
+  const [draftBelongsTo, setDraftBelongsTo] = useState<string | null>(null);
+  if (openFileId !== draftBelongsTo) {
+    setDraftBelongsTo(openFileId);
     if (openFile && openFile.type === "file") {
       setDraftContent(openFile.content);
     }
-    // Reset the draft whenever a different file is opened.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openFileId]);
+  }
 
   function guardedRun(action: () => void) {
     if (isDirty) {
@@ -112,8 +112,6 @@ export default function WorkspaceLayout() {
     ) {
       dispatch(selectFolder({ folderId: node.id }));
     }
-    // Runs once, right after hydration, to restore the folder from the URL.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHydrated]);
 
   useEffect(() => {
@@ -131,13 +129,12 @@ export default function WorkspaceLayout() {
 
   const deleteTarget = deleteNodeId ? nodes[deleteNodeId] : null;
 
-  useEffect(() => {
-    if (!openFileId) return;
-    const file = nodes[openFileId];
-    if (!file || file.isDeleted) {
+  if (openFileId) {
+    const openedFile = nodes[openFileId];
+    if (!openedFile || openedFile.isDeleted) {
       setOpenFileId(null);
     }
-  }, [openFileId, nodes]);
+  }
 
   function handleSearchChange(value: string) {
     setSearch(value);
@@ -203,18 +200,23 @@ export default function WorkspaceLayout() {
     <div className="flex min-h-0 flex-1">
       <Sidebar
         activeNav={activeNav}
+        isMobileOpen={isSidebarOpen}
+        onMobileClose={() => setIsSidebarOpen(false)}
         onNavChange={(navId) =>
           guardedRun(() => {
             setActiveNav(navId);
-            // These views replace the entire main content area,
-            // so close any open file to let them render.
-            if (navId === "recent" || navId === "starred" || navId === "trash") {
-              setOpenFileId(null);
-            }
+            setOpenFileId(null);
+            setIsSidebarOpen(false);
           })
         }
-        onCreateFolder={() => setIsCreateOpen(true)}
-        onCreateWorkspace={() => setIsCreateWorkspaceOpen(true)}
+        onCreateFolder={() => {
+          setIsCreateOpen(true);
+          setIsSidebarOpen(false);
+        }}
+        onCreateWorkspace={() => {
+          setIsCreateWorkspaceOpen(true);
+          setIsSidebarOpen(false);
+        }}
         onRenameFolder={setRenameNodeId}
         onDeleteFolder={setDeleteNodeId}
         onSelectFolder={(folderId) =>
@@ -222,6 +224,7 @@ export default function WorkspaceLayout() {
             dispatch(selectFolder({ folderId }));
             setActiveNav("explorer");
             setOpenFileId(null);
+            setIsSidebarOpen(false);
           })
         }
         onSwitchWorkspace={(workspaceId) =>
@@ -229,12 +232,17 @@ export default function WorkspaceLayout() {
             dispatch(switchWorkspace({ workspaceId }));
             setActiveNav("explorer");
             setOpenFileId(null);
+            setIsSidebarOpen(false);
           })
         }
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <WorkspaceHeader searchValue={search} onSearchChange={handleSearchChange} />
+        <WorkspaceHeader
+          searchValue={search}
+          onSearchChange={handleSearchChange}
+          onOpenMenu={() => setIsSidebarOpen(true)}
+        />
 
         {openFileId ? (
           <TextEditor

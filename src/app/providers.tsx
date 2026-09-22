@@ -14,6 +14,15 @@ export function useIsHydrated() {
   return useContext(HydrationContext);
 }
 
+function ServiceWorkerRegistration() {
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }, []);
+
+  return null;
+}
+
 function ThemeSync({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
   const isDarkMode = useAppSelector((state) => state.ui.isDarkMode);
@@ -45,8 +54,6 @@ function WorkspacePersistence({ children }: { children: React.ReactNode }) {
     }
     const timeout = setTimeout(() => setIsHydrated(true), 250);
     return () => clearTimeout(timeout);
-    // Only run once on mount, before the save-effect below starts firing.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -64,6 +71,7 @@ function WorkspacePersistence({ children }: { children: React.ReactNode }) {
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
+      <ServiceWorkerRegistration />
       <WorkspacePersistence>
         <ThemeSync>{children}</ThemeSync>
       </WorkspacePersistence>

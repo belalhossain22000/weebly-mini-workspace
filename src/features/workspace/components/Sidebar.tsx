@@ -92,6 +92,8 @@ interface SidebarProps {
   onDeleteFolder: (folderId: string) => void;
   onSelectFolder: (folderId: string) => void;
   onSwitchWorkspace: (workspaceId: string) => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export default function Sidebar({
@@ -103,6 +105,8 @@ export default function Sidebar({
   onDeleteFolder,
   onSelectFolder,
   onSwitchWorkspace,
+  isMobileOpen = false,
+  onMobileClose,
 }: SidebarProps) {
   const workspaces = useAppSelector((state) => state.workspace.workspaces);
   const activeWorkspaceId = useAppSelector(
@@ -120,27 +124,53 @@ export default function Sidebar({
   const storage = useLocalStorageSize(nodes);
 
   return (
-    <aside className="flex h-full min-h-0 w-64 shrink-0 flex-col gap-4 bg-gray-900 p-4 text-gray-300">
-      <Link href="/" className="flex items-center gap-2.5 group transition-opacity hover:opacity-90" title="Webbly Workspace">
-        <Image
-          src="/logo-icon.png"
-          alt="Webbly Workspace logo"
-          width={36}
-          height={36}
-          className="shrink-0 rounded-lg transition-transform group-hover:scale-105"
+    <>
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={onMobileClose}
+          aria-hidden="true"
         />
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-body-sm font-semibold text-white group-hover:text-primary-300 transition-colors">
-            Webbly Workspace
-          </h1>
-          <p className="truncate text-caption text-gray-400">
-            Explore · Create · Build
-          </p>
-        </div>
-        <span className="text-gray-500">
-          <ChevronDownIcon />
-        </span>
-      </Link>
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex h-full min-h-0 w-72 shrink-0 -translate-x-full flex-col gap-4 bg-gray-900 p-4 text-gray-300 transition-transform duration-200 ease-out md:static md:z-auto md:w-64 md:translate-x-0 md:transition-none ${
+          isMobileOpen ? "translate-x-0" : ""
+        }`}
+      >
+      <div className="flex items-center gap-2.5">
+        <Link href="/" className="group flex min-w-0 flex-1 items-center gap-2.5 transition-opacity hover:opacity-90" title="Webbly Workspace">
+          <Image
+            src="/logo-icon.png"
+            alt="Webbly Workspace logo"
+            width={36}
+            height={36}
+            className="shrink-0 rounded-lg transition-transform group-hover:scale-105"
+          />
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-body-sm font-semibold text-white group-hover:text-primary-300 transition-colors">
+              Webbly Workspace
+            </h1>
+            <p className="truncate text-caption text-gray-400">
+              Explore · Create · Build
+            </p>
+          </div>
+          <span className="text-gray-500">
+            <ChevronDownIcon />
+          </span>
+        </Link>
+        <button
+          type="button"
+          onClick={onMobileClose}
+          aria-label="Close menu"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-gray-800 hover:text-white md:hidden"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
 
       <Dropdown
         value={activeWorkspaceId}
@@ -252,6 +282,7 @@ export default function Sidebar({
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

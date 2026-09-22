@@ -85,7 +85,6 @@ export async function POST(request: Request) {
       } catch (err) {
         let message = err instanceof Error ? err.message : String(err);
 
-        // Gemini API wraps the real error inside nested JSON strings.
         for (let i = 0; i < 3; i++) {
           try {
             const parsed = JSON.parse(message);

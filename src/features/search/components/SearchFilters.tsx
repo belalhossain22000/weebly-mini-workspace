@@ -33,13 +33,17 @@ const dateOptions: { value: SearchFiltersType["dateModified"]; label: string }[]
   { value: "30days", label: "Last 30 days" },
 ];
 
+export { FilterIcon };
+
 export default function SearchFilters({
   filters,
   onChange,
   locations,
   totalCount,
   counts,
-}: SearchFiltersProps) {
+  className = "hidden w-64 shrink-0 flex-col gap-5 rounded-lg border border-gray-200 p-4 lg:flex dark:border-gray-800",
+  showHeader = true,
+}: SearchFiltersProps & { className?: string; showHeader?: boolean }) {
   function toggleFileType(type: FileTypeFilter) {
     const next = filters.fileTypes.includes(type)
       ? filters.fileTypes.filter((t) => t !== type)
@@ -67,27 +71,29 @@ export default function SearchFilters({
   const isAllLocations = filters.locations.length === 0;
 
   return (
-    <div className="flex w-64 shrink-0 flex-col gap-5 rounded-lg border border-gray-200 p-4 dark:border-gray-800">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-body-sm font-semibold text-gray-900 dark:text-gray-50">
-          <FilterIcon />
-          Filters
+    <div className={className}>
+      {showHeader && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-body-sm font-semibold text-gray-900 dark:text-gray-50">
+            <FilterIcon />
+            Filters
+          </div>
+          <button
+            type="button"
+            onClick={clearAll}
+            disabled={!hasActiveFilters}
+            className={`text-caption ${
+              hasActiveFilters
+                ? "cursor-pointer text-primary-500 hover:text-primary-600"
+                : "cursor-default text-gray-300 dark:text-gray-700"
+            }`}
+          >
+            Clear all
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={clearAll}
-          disabled={!hasActiveFilters}
-          className={`text-caption ${
-            hasActiveFilters
-              ? "cursor-pointer text-primary-500 hover:text-primary-600"
-              : "cursor-default text-gray-300 dark:text-gray-700"
-          }`}
-        >
-          Clear all
-        </button>
-      </div>
+      )}
 
-      <div className="flex flex-col gap-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+      <div className="flex flex-col gap-2 border-t border-gray-100 pt-4 first:border-t-0 first:pt-0 dark:border-gray-800">
         <p className="text-caption font-semibold text-gray-700 dark:text-gray-300">
           File Type
         </p>

@@ -115,14 +115,14 @@ export default function FileFolderCard({
         <button
           type="button"
           onClick={onClick}
-          className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors ${borderClass}`}
+          className={`group relative flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors ${borderClass}`}
         >
           {type === "folder" ? <FolderIcon size={26} /> : <FileIcon size={26} />}
           <span className="flex-1 truncate text-body-sm font-medium text-gray-900 dark:text-gray-50">
             {name}
           </span>
           {isStarred && <StarIcon />}
-          <span className="text-caption text-gray-500 dark:text-gray-400">
+          <span className="hidden shrink-0 text-caption text-gray-500 sm:inline dark:text-gray-400">
             {meta}
           </span>
           {onOpenMenu && (
@@ -133,7 +133,7 @@ export default function FileFolderCard({
                 e.stopPropagation();
                 onOpenMenu();
               }}
-              className="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
             >
               <MenuDotsIcon />
             </span>
@@ -170,7 +170,7 @@ export default function FileFolderCard({
                   e.stopPropagation();
                   onOpenMenu();
                 }}
-                className="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                className="flex h-8 w-8 -m-1 cursor-pointer items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
               >
                 <MenuDotsIcon />
               </span>

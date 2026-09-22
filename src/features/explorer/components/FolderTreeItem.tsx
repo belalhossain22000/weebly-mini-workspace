@@ -61,7 +61,6 @@ export default function FolderTreeItem({
   const hasChildren = folder.children.length > 0;
   const isSelected = folder.id === selectedFolderId;
 
-  // Close menu on outside click
   useEffect(() => {
     if (!isMenuOpen) return;
     function handleOutsideClick(e: MouseEvent) {
@@ -78,7 +77,6 @@ export default function FolderTreeItem({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isMenuOpen]);
 
-  // Close menu on Escape key
   useEffect(() => {
     if (!isMenuOpen) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -131,15 +129,14 @@ export default function FolderTreeItem({
           role="button"
           tabIndex={0}
           onClick={openMenu}
-          className={`flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded text-gray-500 hover:bg-gray-700 hover:text-white ${
-            isMenuOpen ? "flex" : "hidden group-hover:flex"
+          className={`flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded text-gray-500 hover:bg-gray-700 hover:text-white sm:h-5 sm:w-5 ${
+            isMenuOpen ? "flex" : "flex sm:hidden sm:group-hover:flex"
           }`}
         >
           <MenuDotsIcon />
         </span>
       </div>
 
-      {/* Portal-rendered menu — escapes sidebar overflow/clip */}
       {isMenuOpen &&
         typeof document !== "undefined" &&
         createPortal(

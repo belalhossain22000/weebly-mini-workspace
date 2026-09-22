@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
-// Browser localStorage quota is ~5 MB per origin (5 * 1024 * 1024 bytes).
-// Each JS character in localStorage occupies 2 bytes (UTF-16).
 const LOCAL_STORAGE_QUOTA_BYTES = 5 * 1024 * 1024;
 
 function getLocalStorageUsedBytes(): number {
@@ -11,7 +9,6 @@ function getLocalStorageUsedBytes(): number {
     const key = window.localStorage.key(i);
     if (!key) continue;
     const value = window.localStorage.getItem(key) ?? "";
-    // Each UTF-16 character = 2 bytes
     total += (key.length + value.length) * 2;
   }
   return total;
@@ -31,27 +28,19 @@ export interface StorageInfo {
   percentUsed: number;
 }
 
-/**
- * Tracks real-time localStorage usage.
- * Re-calculates whenever the Redux workspace state is saved to localStorage
- * (i.e., whenever `workspaceVersion` changes) or whenever a storage event fires.
- */
 export function useLocalStorageSize(workspaceVersion?: unknown): StorageInfo {
-  const [usedBytes, setUsedBytes] = useState(0);
-
-  useEffect(() => {
-    // Measure immediately
-    setUsedBytes(getLocalStorageUsedBytes());
-  }, [workspaceVersion]);
-
-  useEffect(() => {
-    // Also listen for storage events from other tabs
-    function onStorage() {
-      setUsedBytes(getLocalStorageUsedBytes());
-    }
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+  const subscribe = useCallback((onStoreChange: () => void) => {
+    window.addEventListener("storage", onStoreChange);
+    return () => window.removeEventListener("storage", onStoreChange);
   }, []);
+
+  const usedBytes = useSyncExternalStore(
+    subscribe,
+    getLocalStorageUsedBytes,
+    () => 0
+  );
+
+  void workspaceVersion;
 
   const percentUsed = Math.min((usedBytes / LOCAL_STORAGE_QUOTA_BYTES) * 100, 100);
 

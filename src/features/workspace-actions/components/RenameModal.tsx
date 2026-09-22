@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { renameNode } from "@/features/workspace/workspaceSlice";
 import { validateItemName } from "@/features/explorer/explorer.utils";
@@ -22,12 +22,13 @@ export default function RenameModal({ isOpen, onClose, nodeId }: RenameModalProp
   const [name, setName] = useState(node?.name ?? "");
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen && node) {
-      setName(node.name);
-      setError(null);
-    }
-  }, [isOpen, node]);
+  const syncKey = isOpen && node ? `${node.id}:${isOpen}` : null;
+  const [lastSyncedKey, setLastSyncedKey] = useState<string | null>(null);
+  if (syncKey && syncKey !== lastSyncedKey) {
+    setLastSyncedKey(syncKey);
+    if (node && name !== node.name) setName(node.name);
+    if (error !== null) setError(null);
+  }
 
   if (!node) return null;
 

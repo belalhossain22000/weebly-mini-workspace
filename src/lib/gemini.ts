@@ -6,13 +6,6 @@ export type AiAction =
   | "make_shorter"
   | "custom";
 
-/**
- * Streams an AI response for the given action on the provided text.
- * Calls onChunk for each streamed text chunk, and onDone when complete.
- *
- * The actual Gemini call happens server-side in /api/ai — the API key
- * never reaches the browser.
- */
 export async function streamAiEdit({
   action,
   content,

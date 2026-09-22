@@ -30,31 +30,52 @@ function MoonIcon() {
   );
 }
 
+function MenuIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
 interface WorkspaceHeaderProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
+  onOpenMenu?: () => void;
 }
 
 export default function WorkspaceHeader({
   searchValue,
   onSearchChange,
+  onOpenMenu,
 }: WorkspaceHeaderProps) {
   const dispatch = useAppDispatch();
   const isDarkMode = useAppSelector((state) => state.ui.isDarkMode);
 
   return (
-    <header className="flex items-center justify-between gap-4 border-b border-gray-100 bg-white px-6 py-3 dark:border-gray-800 dark:bg-gray-900">
+    <header className="flex items-center justify-between gap-2 border-b border-gray-100 bg-white px-3 py-3 sm:gap-4 sm:px-6 dark:border-gray-800 dark:bg-gray-900">
+      <button
+        type="button"
+        onClick={onOpenMenu}
+        aria-label="Open menu"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 md:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+      >
+        <MenuIcon />
+      </button>
+
       <div className="min-w-0 max-w-2xl flex-1">
         <Input
           variant="filled"
           icon={<SearchIcon />}
-          placeholder="Search files, folders, or anything..."
+          placeholder="Search files, folders..."
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           onClear={() => onSearchChange("")}
           rightElement={
             !searchValue ? (
-              <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-caption text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500">
+              <kbd className="hidden rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-caption text-gray-400 sm:inline dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500">
                 ⌘ K
               </kbd>
             ) : undefined
@@ -62,7 +83,7 @@ export default function WorkspaceHeader({
         />
       </div>
 
-      <div className="flex shrink-0 items-center gap-4">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-4">
         <button
           type="button"
           onClick={() => dispatch(toggleDarkMode())}

@@ -27,6 +27,28 @@ function makeFolder(
   };
 }
 
+function makeFile(
+  name: string,
+  parentId: string,
+  workspaceId: string,
+  content: string
+): import("./workspace.types").FileNode {
+  const now = Date.now();
+  return {
+    id: crypto.randomUUID(),
+    name,
+    type: "file",
+    parentId,
+    workspaceId,
+    isStarred: false,
+    isDeleted: false,
+    deletedAt: null,
+    createdAt: now,
+    updatedAt: now,
+    content,
+  };
+}
+
 function createInitialState(): WorkspaceState {
   const workspaceId = crypto.randomUUID();
   const rootFolderId = crypto.randomUUID();
@@ -46,7 +68,7 @@ function createInitialState(): WorkspaceState {
     childrenIds: [],
   };
 
-  const nodes: Record<string, FolderNode> = { [rootFolderId]: rootFolder };
+  const nodes: Record<string, import("./workspace.types").WorkspaceNode> = { [rootFolderId]: rootFolder };
 
   const projects = makeFolder("Projects", rootFolderId, workspaceId);
   const personal = makeFolder("Personal", rootFolderId, workspaceId);
@@ -67,10 +89,49 @@ function createInitialState(): WorkspaceState {
   const frontend = makeFolder("frontend", webbly.id, workspaceId);
   const backend = makeFolder("backend", webbly.id, workspaceId);
   const docs = makeFolder("docs", webbly.id, workspaceId);
-  webbly.childrenIds = [frontend.id, backend.id, docs.id];
+
+  const notesContent = `# Project Notes
+
+## Ideas
+- Build a modern workspace explorer
+- Add search functionality
+- Support multiple workspaces
+- Implement drag and drop
+- Add file preview for images and documents
+
+## TODO
+- [x] Design main workspace UI
+- [x] Implement file editor and preview
+- [x] Add create/rename/delete functionality
+- [ ] Implement search
+- [ ] Add responsive design
+
+## Tech Stack
+- Next.js
+- Redux Toolkit
+- Tailwind CSS
+- localStorage (persistence)
+- TypeScript
+
+## Links
+- [Design Reference](https://ui.shadcn.com)
+- [Icons](https://lucide.dev)
+- [Next.js Docs](https://nextjs.org/docs)`;
+
+  const notesFile = makeFile("notes.txt", webbly.id, workspaceId, notesContent);
+  const tasksFile = makeFile(
+    "tasks.txt",
+    webbly.id,
+    workspaceId,
+    `# Tasks & Roadmap\n\n- [x] Setup Redux Store & Flat Data Model\n- [x] Workspace Explorer & Breadcrumbs\n- [x] Default Document Preview Mode\n- [ ] Gemini AI Assistant Streaming Integration`
+  );
+
+  webbly.childrenIds = [frontend.id, backend.id, docs.id, notesFile.id, tasksFile.id];
   nodes[frontend.id] = frontend;
   nodes[backend.id] = backend;
   nodes[docs.id] = docs;
+  nodes[notesFile.id] = notesFile;
+  nodes[tasksFile.id] = tasksFile;
 
   return {
     workspaces: {

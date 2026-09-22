@@ -10,9 +10,10 @@ import {
 } from "../search.utils";
 import type { SearchFilters as SearchFiltersType, SortOption, TypeTab, SearchResult } from "../search.utils";
 import SearchResults from "./SearchResults";
-import SearchFiltersPanel from "./SearchFilters";
+import SearchFiltersPanel, { FilterIcon } from "./SearchFilters";
 import Dropdown from "@/components/ui/Dropdown";
 import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 
 function HomeIcon() {
   return (
@@ -90,17 +91,15 @@ export default function SearchView({
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [filters, setFilters] = useState<SearchFiltersType>(defaultFilters);
   const [debouncedQuery, setDebouncedQuery] = useState(query);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const isSearching = query !== debouncedQuery;
 
   useEffect(() => {
     if (query === debouncedQuery) return;
-    setIsSearching(true);
     const timeout = setTimeout(() => {
       setDebouncedQuery(query);
-      setIsSearching(false);
     }, 250);
     return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   const allResults = useMemo(() => {
@@ -146,10 +145,14 @@ export default function SearchView({
 
   const filesCount = allResults.filter((r) => r.node.type === "file").length;
   const foldersCount = allResults.filter((r) => r.node.type === "folder").length;
+  const activeFilterCount =
+    filters.fileTypes.length +
+    filters.locations.length +
+    (filters.dateModified !== "any" ? 1 : 0);
 
   if (!query.trim()) {
     return (
-      <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
+      <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-4 sm:p-6">
         <nav className="flex items-center gap-2 text-body-sm text-gray-500 dark:text-gray-400">
           <button
             type="button"
@@ -193,7 +196,7 @@ export default function SearchView({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
+    <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-4 sm:gap-6 sm:p-6">
       <nav className="flex items-center gap-2 text-body-sm text-gray-500 dark:text-gray-400">
         <button
           type="button"
@@ -227,8 +230,8 @@ export default function SearchView({
         </p>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 rounded-md border border-gray-200 p-1 dark:border-gray-700">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-1 overflow-x-auto rounded-md border border-gray-200 p-1 dark:border-gray-700">
           {(
             [
               { id: "all", label: "All" },
@@ -240,7 +243,7 @@ export default function SearchView({
               key={tab.id}
               type="button"
               onClick={() => setTypeTab(tab.id)}
-              className={`cursor-pointer rounded px-3 py-1.5 text-body-sm ${
+              className={`shrink-0 cursor-pointer rounded px-3 py-1.5 text-body-sm ${
                 typeTab === tab.id
                   ? "bg-primary-500 text-white"
                   : "text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -253,15 +256,30 @@ export default function SearchView({
           ))}
         </div>
 
-        <Dropdown
-          value={sortBy}
-          onChange={(value) => setSortBy(value as SortOption)}
-          options={[
-            { value: "relevance", label: "Sort by: Relevance" },
-            { value: "name", label: "Sort by: Name" },
-            { value: "date", label: "Sort by: Date Modified" },
-          ]}
-        />
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsFilterSheetOpen(true)}
+            className="relative flex h-10 items-center gap-1.5 rounded-md border border-gray-200 px-3 text-body-sm text-gray-600 hover:bg-gray-50 lg:hidden dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            <FilterIcon />
+            Filter
+            {activeFilterCount > 0 && (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-500 px-1 text-[10px] font-semibold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+          <Dropdown
+            value={sortBy}
+            onChange={(value) => setSortBy(value as SortOption)}
+            options={[
+              { value: "relevance", label: "Sort by: Relevance" },
+              { value: "name", label: "Sort by: Name" },
+              { value: "date", label: "Sort by: Date Modified" },
+            ]}
+          />
+        </div>
       </div>
 
       <div className="flex gap-6">
@@ -305,6 +323,36 @@ export default function SearchView({
           counts={counts}
         />
       </div>
+
+      <Modal
+        isOpen={isFilterSheetOpen}
+        onClose={() => setIsFilterSheetOpen(false)}
+        title="Filters"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => setFilters(defaultFilters)}
+              disabled={activeFilterCount === 0}
+            >
+              Clear all
+            </Button>
+            <Button variant="primary" onClick={() => setIsFilterSheetOpen(false)}>
+              Show results
+            </Button>
+          </>
+        }
+      >
+        <SearchFiltersPanel
+          filters={filters}
+          onChange={setFilters}
+          locations={locations}
+          totalCount={allResults.length}
+          counts={counts}
+          className="flex w-full flex-col gap-5"
+          showHeader={false}
+        />
+      </Modal>
     </div>
   );
 }

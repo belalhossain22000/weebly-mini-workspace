@@ -7,6 +7,7 @@ import {
   formatBytes,
   formatRelativeTime,
 } from "@/features/explorer/explorer.utils";
+import { useIsClient } from "@/lib/useIsClient";
 import EmptyState from "@/components/shared/EmptyState";
 import { FolderIcon, FileIcon } from "@/components/ui/FileFolderIcon";
 
@@ -57,6 +58,7 @@ export default function StarredView({
       state.workspace.workspaces[state.workspace.activeWorkspaceId]?.rootFolderId
   );
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const isMounted = useIsClient();
 
   const starredNodes = Object.values(nodes)
     .filter(
@@ -70,8 +72,7 @@ export default function StarredView({
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto bg-zinc-50 dark:bg-black">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-6 py-3 dark:border-gray-800">
+      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 sm:px-6 dark:border-gray-800">
         <div className="flex items-center gap-2">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="1.8">
             <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9" />
@@ -81,7 +82,7 @@ export default function StarredView({
         <span className="text-caption text-gray-400">{starredNodes.length} item{starredNodes.length !== 1 ? "s" : ""}</span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-6 p-6">
+      <div className="flex flex-1 flex-col gap-5 p-4 sm:gap-6 sm:p-6">
         <div>
           <h1 className="text-heading-3 text-gray-900 dark:text-gray-50">Starred Items</h1>
           <p className="mt-1 text-body-sm text-gray-500 dark:text-gray-400">
@@ -119,13 +120,13 @@ export default function StarredView({
                   <span className="shrink-0">
                     <StarIconFilled />
                   </span>
-                  <span className="shrink-0 text-caption text-gray-400">
+                  <span className="hidden shrink-0 text-caption text-gray-400 sm:inline">
                     {node.type === "file"
                       ? formatBytes(node.content.length)
                       : `${node.childrenIds.length} item${node.childrenIds.length !== 1 ? "s" : ""}`}
                   </span>
-                  <span className="w-24 shrink-0 text-right text-caption text-gray-400">
-                    {formatRelativeTime(node.updatedAt)}
+                  <span className="hidden w-24 shrink-0 text-right text-caption text-gray-400 sm:inline">
+                    {isMounted ? formatRelativeTime(node.updatedAt) : ""}
                   </span>
                   <span
                     role="button"
@@ -140,7 +141,7 @@ export default function StarredView({
                         setOpenMenuId((c) => (c === node.id ? null : node.id));
                       }
                     }}
-                    className="cursor-pointer text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-gray-600 dark:hover:text-gray-200"
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center text-gray-400 hover:text-gray-600 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 dark:hover:text-gray-200"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                       <circle cx="12" cy="5" r="1.5" />
