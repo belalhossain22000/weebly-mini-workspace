@@ -4,6 +4,7 @@ export interface BreadcrumbItem {
 }
 
 interface BreadcrumbsProps {
+  rootId: string;
   items: BreadcrumbItem[];
   onNavigate: (id: string) => void;
 }
@@ -16,12 +17,12 @@ function HomeIcon() {
   );
 }
 
-export default function Breadcrumbs({ items, onNavigate }: BreadcrumbsProps) {
+export default function Breadcrumbs({ rootId, items, onNavigate }: BreadcrumbsProps) {
   return (
     <nav className="flex items-center gap-2 text-body-sm text-gray-500 dark:text-gray-400">
       <button
         type="button"
-        onClick={() => items[0] && onNavigate(items[0].id)}
+        onClick={() => onNavigate(rootId)}
         className="flex items-center hover:text-gray-700 dark:hover:text-gray-200"
         aria-label="Home"
       >

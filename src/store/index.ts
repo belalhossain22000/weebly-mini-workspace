@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import workspaceReducer from "@/features/workspace/workspaceSlice";
+import uiReducer from "@/features/ui/uiSlice";
 
 export const store = configureStore({
   reducer: {
     workspace: workspaceReducer,
+    ui: uiReducer,
   },
 });
 
