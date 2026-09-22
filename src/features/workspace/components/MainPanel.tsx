@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { createNode, selectFolder } from "@/features/workspace/workspaceSlice";
+import { selectFolder, toggleStar } from "@/features/workspace/workspaceSlice";
 import {
-  getAvailableName,
   getBreadcrumbPath,
   formatBytes,
   formatRelativeTime,
@@ -13,18 +12,11 @@ import Breadcrumbs from "@/features/explorer/components/Breadcrumbs";
 import FileFolderCard from "@/features/explorer/components/FileFolderCard";
 import EmptyState from "@/components/shared/EmptyState";
 import Button from "@/components/ui/Button";
+import { FolderIcon } from "@/components/ui/FileFolderIcon";
 
 function EmptyFolderIcon() {
   return (
     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
-    </svg>
-  );
-}
-
-function FolderHeaderIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="#2563EB">
       <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
     </svg>
   );
@@ -77,15 +69,6 @@ function ListIcon() {
   );
 }
 
-function UploadIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" y1="3" x2="12" y2="15" />
-    </svg>
-  );
-}
 
 type ViewMode = "grid" | "list";
 
@@ -113,32 +96,11 @@ export default function MainPanel({
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isMounted, setIsMounted] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  function handleFileUpload(fileList: FileList | null) {
-    if (!fileList || fileList.length === 0) return;
-
-    Array.from(fileList).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const content = typeof reader.result === "string" ? reader.result : "";
-        const availableName = getAvailableName(nodes, selectedFolderId, file.name);
-        dispatch(
-          createNode({
-            parentId: selectedFolderId,
-            name: availableName,
-            type: "file",
-            content,
-          })
-        );
-      };
-      reader.readAsText(file);
-    });
-  }
 
   if (!workspace) return null;
 
@@ -170,21 +132,6 @@ export default function MainPanel({
           <Button variant="primary" onClick={onCreate}>
             + New
           </Button>
-          <Button variant="ghost" onClick={() => fileInputRef.current?.click()}>
-            <UploadIcon />
-            Upload Files
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".txt"
-            className="hidden"
-            onChange={(e) => {
-              handleFileUpload(e.target.files);
-              e.target.value = "";
-            }}
-          />
           <div className="flex items-center rounded-md border border-gray-200 dark:border-gray-700">
             <button
               type="button"
@@ -216,7 +163,7 @@ export default function MainPanel({
 
       <div className="flex flex-1 flex-col gap-6 p-6">
         <div className="flex items-center gap-3">
-          <FolderHeaderIcon />
+          <FolderIcon size={40} />
           <div>
             <h2 className="text-heading-3 text-gray-900 dark:text-gray-50">
               {selectedFolder.name}
@@ -233,16 +180,10 @@ export default function MainPanel({
           <EmptyState
             icon={<EmptyFolderIcon />}
             title="This folder is empty"
-            description="No files or folders here yet. Create something new or upload files."
+            description="No files or folders here yet. Create something new."
             action={
               <Button variant="primary" onClick={onCreate}>
                 + Create
-              </Button>
-            }
-            secondaryAction={
-              <Button variant="ghost" onClick={() => fileInputRef.current?.click()}>
-                <UploadIcon />
-                Upload Files
               </Button>
             }
           />
@@ -277,6 +218,10 @@ export default function MainPanel({
                 onOpenMenu={() =>
                   setOpenMenuId((current) => (current === node.id ? null : node.id))
                 }
+                onToggleStar={() => {
+                  dispatch(toggleStar({ nodeId: node.id }));
+                  setOpenMenuId(null);
+                }}
                 onRename={() => {
                   onRename(node.id);
                   setOpenMenuId(null);

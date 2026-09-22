@@ -7,6 +7,7 @@ import { validateItemName } from "@/features/explorer/explorer.utils";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { FolderIcon, FileIcon } from "@/components/ui/FileFolderIcon";
 
 type Step = "choose" | "folder" | "file";
 
@@ -14,23 +15,6 @@ interface CreateItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   parentId: string;
-}
-
-function FolderChoiceIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="#2563EB">
-      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
-    </svg>
-  );
-}
-
-function FileChoiceIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5">
-      <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
-      <path d="M14 2v6h6" />
-    </svg>
-  );
 }
 
 export default function CreateItemModal({
@@ -86,7 +70,7 @@ export default function CreateItemModal({
             onClick={() => setStep("folder")}
             className="flex items-center gap-3 rounded-md border border-gray-200 p-3 text-left hover:border-primary-500 hover:bg-primary-50 dark:border-gray-700 dark:hover:bg-primary-500/10"
           >
-            <FolderChoiceIcon />
+            <FolderIcon size={32} />
             <div>
               <p className="text-body-sm font-medium text-gray-900 dark:text-gray-50">
                 New Folder
@@ -102,7 +86,7 @@ export default function CreateItemModal({
             onClick={() => setStep("file")}
             className="flex items-center gap-3 rounded-md border border-gray-200 p-3 text-left hover:border-primary-500 hover:bg-primary-50 dark:border-gray-700 dark:hover:bg-primary-500/10"
           >
-            <FileChoiceIcon />
+            <FileIcon size={32} />
             <div>
               <p className="text-body-sm font-medium text-gray-900 dark:text-gray-50">
                 New Text File

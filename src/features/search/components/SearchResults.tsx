@@ -1,27 +1,11 @@
 import type { SearchResult } from "../search.utils";
 import { formatBytes, formatRelativeTime } from "@/features/explorer/explorer.utils";
+import { FolderIcon, FileIcon } from "@/components/ui/FileFolderIcon";
 
 interface SearchResultsProps {
   results: SearchResult[];
   query: string;
   onNavigate: (result: SearchResult) => void;
-}
-
-function FolderIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="#2563EB">
-      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
-    </svg>
-  );
-}
-
-function FileIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5">
-      <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
-      <path d="M14 2v6h6" />
-    </svg>
-  );
 }
 
 function MenuDotsIcon() {

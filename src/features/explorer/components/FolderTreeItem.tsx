@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { FolderIcon } from "@/components/ui/FileFolderIcon";
 
 export interface TreeFolder {
   id: string;
@@ -33,19 +35,6 @@ function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
   );
 }
 
-function FolderIcon({ isSelected }: { isSelected: boolean }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill={isSelected ? "#2563EB" : "#F5B942"}
-    >
-      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
-    </svg>
-  );
-}
-
 function MenuDotsIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -66,8 +55,46 @@ export default function FolderTreeItem({
 }: FolderTreeItemProps) {
   const [isExpanded, setIsExpanded] = useState(depth === 0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const menuBtnRef = useRef<HTMLSpanElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const hasChildren = folder.children.length > 0;
   const isSelected = folder.id === selectedFolderId;
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    function handleOutsideClick(e: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        menuBtnRef.current &&
+        !menuBtnRef.current.contains(e.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [isMenuOpen]);
+
+  // Close menu on Escape key
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsMenuOpen(false);
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
+
+  function openMenu(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!menuBtnRef.current) return;
+    const rect = menuBtnRef.current.getBoundingClientRect();
+    setMenuPos({ top: rect.bottom + 4, left: rect.right - 128 });
+    setIsMenuOpen((v) => !v);
+  }
 
   return (
     <div>
@@ -96,27 +123,30 @@ export default function FolderTreeItem({
         >
           <ChevronIcon isExpanded={isExpanded} />
         </span>
-        <FolderIcon isSelected={isSelected} />
+        <FolderIcon isSelected={isSelected} size={16} />
         <span className="flex-1 truncate">{folder.name}</span>
 
         <span
+          ref={menuBtnRef}
           role="button"
           tabIndex={0}
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsMenuOpen((v) => !v);
-          }}
+          onClick={openMenu}
           className={`flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded text-gray-500 hover:bg-gray-700 hover:text-white ${
             isMenuOpen ? "flex" : "hidden group-hover:flex"
           }`}
         >
           <MenuDotsIcon />
         </span>
+      </div>
 
-        {isMenuOpen && (
+      {/* Portal-rendered menu — escapes sidebar overflow/clip */}
+      {isMenuOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="absolute right-2 top-full z-20 mt-1 min-w-[120px] overflow-hidden rounded-md border border-gray-700 bg-gray-800 shadow-lg"
+            ref={menuRef}
+            style={{ top: menuPos.top, left: menuPos.left }}
+            className="fixed z-[9999] w-32 overflow-hidden rounded-md border border-gray-700 bg-gray-800 shadow-xl"
           >
             <button
               type="button"
@@ -138,9 +168,9 @@ export default function FolderTreeItem({
             >
               Delete
             </button>
-          </div>
+          </div>,
+          document.body
         )}
-      </div>
 
       {hasChildren && isExpanded && (
         <div>

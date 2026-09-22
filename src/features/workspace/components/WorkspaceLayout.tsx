@@ -21,6 +21,9 @@ import SearchView from "@/features/search/components/SearchView";
 import type { SearchResult } from "@/features/search/search.utils";
 import TextEditor from "@/features/editor/components/TextEditor";
 import UnsavedChangesModal from "@/features/editor/components/UnsavedChangesModal";
+import RecentView from "./RecentView";
+import StarredView from "./StarredView";
+import TrashView from "./TrashView";
 
 export default function WorkspaceLayout() {
   const dispatch = useAppDispatch();
@@ -52,6 +55,16 @@ export default function WorkspaceLayout() {
   const isDirty = Boolean(
     openFile && openFile.type === "file" && draftContent !== openFile.content
   );
+
+  // Warn the browser before reload/close when there are unsaved changes.
+  useEffect(() => {
+    if (!isDirty) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   useEffect(() => {
     if (openFile && openFile.type === "file") {
@@ -190,7 +203,16 @@ export default function WorkspaceLayout() {
     <div className="flex min-h-0 flex-1">
       <Sidebar
         activeNav={activeNav}
-        onNavChange={(navId) => guardedRun(() => setActiveNav(navId))}
+        onNavChange={(navId) =>
+          guardedRun(() => {
+            setActiveNav(navId);
+            // These views replace the entire main content area,
+            // so close any open file to let them render.
+            if (navId === "recent" || navId === "starred" || navId === "trash") {
+              setOpenFileId(null);
+            }
+          })
+        }
         onCreateFolder={() => setIsCreateOpen(true)}
         onCreateWorkspace={() => setIsCreateWorkspaceOpen(true)}
         onRenameFolder={setRenameNodeId}
@@ -250,6 +272,32 @@ export default function WorkspaceLayout() {
               })
             }
           />
+        ) : activeNav === "recent" ? (
+          <RecentView
+            onOpenFile={(fileId) => guardedRun(() => setOpenFileId(fileId))}
+            onNavigate={(folderId) =>
+              guardedRun(() => {
+                dispatch(selectFolder({ folderId }));
+                setActiveNav("explorer");
+              })
+            }
+            onRename={setRenameNodeId}
+            onDelete={setDeleteNodeId}
+          />
+        ) : activeNav === "starred" ? (
+          <StarredView
+            onOpenFile={(fileId) => guardedRun(() => setOpenFileId(fileId))}
+            onNavigate={(folderId) =>
+              guardedRun(() => {
+                dispatch(selectFolder({ folderId }));
+                setActiveNav("explorer");
+              })
+            }
+            onRename={setRenameNodeId}
+            onDelete={setDeleteNodeId}
+          />
+        ) : activeNav === "trash" ? (
+          <TrashView />
         ) : (
           <MainPanel
             onOpenFile={(fileId) => guardedRun(() => setOpenFileId(fileId))}

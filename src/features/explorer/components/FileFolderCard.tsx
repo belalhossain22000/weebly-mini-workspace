@@ -1,3 +1,5 @@
+import { FolderIcon, FileIcon } from "@/components/ui/FileFolderIcon";
+
 interface FileFolderCardProps {
   name: string;
   type: "folder" | "file";
@@ -8,32 +10,22 @@ interface FileFolderCardProps {
   isMenuOpen?: boolean;
   onClick?: () => void;
   onOpenMenu?: () => void;
+  onToggleStar?: () => void;
   onRename?: () => void;
   onDelete?: () => void;
 }
 
-function FolderIcon({ size = 32 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="#2563EB">
-      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
-    </svg>
-  );
-}
 
-function FileIcon({ size = 32 }: { size?: number }) {
+function StarIcon({ filled = true }: { filled?: boolean }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5">
-      <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
-      <path d="M14 2v6h6" />
-      <line x1="8" y1="13" x2="16" y2="13" />
-      <line x1="8" y1="17" x2="16" y2="17" />
-    </svg>
-  );
-}
-
-function StarIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill={filled ? "#F59E0B" : "none"}
+      stroke={filled ? "#F59E0B" : "currentColor"}
+      strokeWidth="1.8"
+    >
       <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9" />
     </svg>
   );
@@ -50,14 +42,31 @@ function MenuDotsIcon() {
 }
 
 function DropdownMenu({
+  isStarred,
+  onToggleStar,
   onRename,
   onDelete,
 }: {
+  isStarred?: boolean;
+  onToggleStar?: () => void;
   onRename?: () => void;
   onDelete?: () => void;
 }) {
   return (
-    <div className="absolute right-0 top-full z-10 mt-1 min-w-[120px] overflow-hidden rounded-md border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="absolute right-0 top-full z-10 mt-1 min-w-[140px] overflow-hidden rounded-md border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
+      {onToggleStar && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleStar();
+          }}
+          className="flex w-full items-center gap-2 px-3 py-2 text-left text-body-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
+        >
+          <StarIcon filled={isStarred} />
+          {isStarred ? "Unstar" : "Star"}
+        </button>
+      )}
       <button
         type="button"
         onClick={(e) => {
@@ -92,6 +101,7 @@ export default function FileFolderCard({
   isMenuOpen = false,
   onClick,
   onOpenMenu,
+  onToggleStar,
   onRename,
   onDelete,
 }: FileFolderCardProps) {
@@ -107,7 +117,7 @@ export default function FileFolderCard({
           onClick={onClick}
           className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors ${borderClass}`}
         >
-          {type === "folder" ? <FolderIcon size={20} /> : <FileIcon size={20} />}
+          {type === "folder" ? <FolderIcon size={26} /> : <FileIcon size={26} />}
           <span className="flex-1 truncate text-body-sm font-medium text-gray-900 dark:text-gray-50">
             {name}
           </span>
@@ -129,7 +139,14 @@ export default function FileFolderCard({
             </span>
           )}
         </button>
-        {isMenuOpen && <DropdownMenu onRename={onRename} onDelete={onDelete} />}
+        {isMenuOpen && (
+          <DropdownMenu
+            isStarred={isStarred}
+            onToggleStar={onToggleStar}
+            onRename={onRename}
+            onDelete={onDelete}
+          />
+        )}
       </div>
     );
   }
@@ -142,7 +159,7 @@ export default function FileFolderCard({
         className={`group relative flex w-full cursor-pointer flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors ${borderClass}`}
       >
         <div className="flex w-full items-start justify-between">
-          {type === "folder" ? <FolderIcon /> : <FileIcon />}
+          {type === "folder" ? <FolderIcon size={48} /> : <FileIcon size={46} />}
           <div className="flex items-center gap-1">
             {isStarred && <StarIcon />}
             {onOpenMenu && (
@@ -170,7 +187,14 @@ export default function FileFolderCard({
           </span>
         </div>
       </button>
-      {isMenuOpen && <DropdownMenu onRename={onRename} onDelete={onDelete} />}
+      {isMenuOpen && (
+        <DropdownMenu
+          isStarred={isStarred}
+          onToggleStar={onToggleStar}
+          onRename={onRename}
+          onDelete={onDelete}
+        />
+      )}
     </div>
   );
 }

@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useAppSelector } from "@/store/hooks";
 import Dropdown from "@/components/ui/Dropdown";
 import FolderTree from "@/features/explorer/components/FolderTree";
+import { useLocalStorageSize } from "@/lib/useLocalStorageSize";
 
 function ExplorerIcon() {
   return (
@@ -114,18 +116,21 @@ export default function Sidebar({
 
   const activeWorkspaceName = workspaces[activeWorkspaceId]?.name ?? "Workspace";
 
+  const nodes = useAppSelector((state) => state.workspace.nodes);
+  const storage = useLocalStorageSize(nodes);
+
   return (
     <aside className="flex h-full min-h-0 w-64 shrink-0 flex-col gap-4 bg-gray-900 p-4 text-gray-300">
-      <div className="flex items-center gap-2.5">
+      <Link href="/" className="flex items-center gap-2.5 group transition-opacity hover:opacity-90" title="Webbly Workspace">
         <Image
           src="/logo-icon.png"
           alt="Webbly Workspace logo"
           width={36}
           height={36}
-          className="shrink-0 rounded-lg"
+          className="shrink-0 rounded-lg transition-transform group-hover:scale-105"
         />
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-body-sm font-semibold text-white">
+          <h1 className="truncate text-body-sm font-semibold text-white group-hover:text-primary-300 transition-colors">
             Webbly Workspace
           </h1>
           <p className="truncate text-caption text-gray-400">
@@ -135,7 +140,7 @@ export default function Sidebar({
         <span className="text-gray-500">
           <ChevronDownIcon />
         </span>
-      </div>
+      </Link>
 
       <Dropdown
         value={activeWorkspaceId}
@@ -229,24 +234,21 @@ export default function Sidebar({
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-caption text-gray-400">
             <span>Storage</span>
-            <span>2.4 GB of 10 GB used</span>
+            <span>
+              {storage.usedLabel} of {storage.totalLabel} used
+            </span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
-            <div className="h-full w-1/4 rounded-full bg-primary-500" />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-body-sm font-medium text-white">
-            B
-          </div>
-          <div className="flex flex-col overflow-hidden">
-            <span className="truncate text-body-sm font-medium text-white">
-              Belal Hossain
-            </span>
-            <span className="truncate text-caption text-gray-500">
-              belalhossain22000@gmail.com
-            </span>
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                storage.percentUsed >= 90
+                  ? "bg-red-500"
+                  : storage.percentUsed >= 70
+                  ? "bg-amber-500"
+                  : "bg-primary-500"
+              }`}
+              style={{ width: `${Math.max(storage.percentUsed, 1)}%` }}
+            />
           </div>
         </div>
       </div>
