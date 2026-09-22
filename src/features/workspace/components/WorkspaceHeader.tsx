@@ -43,38 +43,47 @@ export default function WorkspaceHeader({
   const isDarkMode = useAppSelector((state) => state.ui.isDarkMode);
 
   return (
-    <header className="flex items-center gap-4 border-b border-gray-100 bg-white px-6 py-3 dark:border-gray-800 dark:bg-gray-900">
-      <div className="max-w-md flex-1">
+    <header className="flex items-center justify-between gap-4 border-b border-gray-100 bg-white px-6 py-3 dark:border-gray-800 dark:bg-gray-900">
+      <div className="min-w-0 max-w-2xl flex-1">
         <Input
+          variant="filled"
           icon={<SearchIcon />}
           placeholder="Search files, folders, or anything..."
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           onClear={() => onSearchChange("")}
+          rightElement={
+            !searchValue ? (
+              <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-caption text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500">
+                ⌘ K
+              </kbd>
+            ) : undefined
+          }
         />
       </div>
 
-      <button
-        type="button"
-        onClick={() => dispatch(toggleDarkMode())}
-        aria-label="Toggle dark mode"
-        className="flex items-center gap-1.5 rounded-full bg-gray-100 p-1 dark:bg-gray-800"
-      >
-        <span
-          className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
-            !isDarkMode ? "bg-white text-primary-500 shadow-sm" : "text-gray-500"
-          }`}
+      <div className="flex shrink-0 items-center gap-4">
+        <button
+          type="button"
+          onClick={() => dispatch(toggleDarkMode())}
+          aria-label="Toggle dark mode"
+          className="flex items-center gap-1.5"
         >
-          <SunIcon />
-        </span>
-        <span
-          className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
-            isDarkMode ? "bg-gray-700 text-primary-400 shadow-sm" : "text-gray-400"
-          }`}
-        >
-          <MoonIcon />
-        </span>
-      </button>
+          <span className="text-primary-500 dark:text-gray-500">
+            <SunIcon />
+          </span>
+          <span className="relative flex h-5 w-9 items-center rounded-full bg-primary-500 transition-colors">
+            <span
+              className={`absolute h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                isDarkMode ? "translate-x-[18px]" : "translate-x-0.5"
+              }`}
+            />
+          </span>
+          <span className="text-gray-400 dark:text-primary-400">
+            <MoonIcon />
+          </span>
+        </button>
+      </div>
     </header>
   );
 }

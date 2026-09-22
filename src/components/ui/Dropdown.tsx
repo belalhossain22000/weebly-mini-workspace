@@ -14,6 +14,8 @@ interface DropdownProps {
   value: string;
   onChange: (value: string) => void;
   trigger?: ReactNode;
+  triggerClassName?: string;
+  hideDefaultChevron?: boolean;
 }
 
 export default function Dropdown({
@@ -21,6 +23,8 @@ export default function Dropdown({
   value,
   onChange,
   trigger,
+  triggerClassName,
+  hideDefaultChevron = false,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,7 +49,10 @@ export default function Dropdown({
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-body-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+        className={
+          triggerClassName ??
+          "flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-body-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+        }
       >
         {trigger ?? (
           <>
@@ -53,7 +60,7 @@ export default function Dropdown({
             <span>{selectedOption?.label ?? "Select"}</span>
           </>
         )}
-        <span className="text-gray-400">▾</span>
+        {!hideDefaultChevron && <span className="text-gray-400">▾</span>}
       </button>
 
       {isOpen && (

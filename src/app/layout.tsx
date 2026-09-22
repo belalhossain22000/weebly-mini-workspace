@@ -11,12 +11,15 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Webbly Workspace",
   description: "Mini Workspace Explorer",
+  icons: {
+    icon: "/logo-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+      <body className="h-full flex flex-col overflow-hidden">
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -70,3 +70,43 @@ export function formatRelativeTime(timestamp: number): string {
   if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
   return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
 }
+
+export function countNestedItems(
+  nodes: NodesById,
+  folderId: string
+): { folders: number; files: number } {
+  const folder = nodes[folderId];
+  if (!folder || folder.type !== "folder") {
+    return { folders: 0, files: 0 };
+  }
+
+  let folders = 0;
+  let files = 0;
+
+  for (const childId of folder.childrenIds) {
+    const child = nodes[childId];
+    if (!child || child.isDeleted) continue;
+
+    if (child.type === "folder") {
+      folders += 1;
+      const nested = countNestedItems(nodes, child.id);
+      folders += nested.folders;
+      files += nested.files;
+    } else {
+      files += 1;
+    }
+  }
+
+  return { folders, files };
+}
+
+export function getNodePath(
+  nodes: NodesById,
+  nodeId: string,
+  rootFolderId: string
+): string {
+  const names = getBreadcrumbPath(nodes, nodeId, rootFolderId).map(
+    (item) => item.name
+  );
+  return `/${names.join("/")}`;
+}
