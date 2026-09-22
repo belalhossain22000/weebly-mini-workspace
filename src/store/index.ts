@@ -1,7 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
+import workspaceReducer from "@/features/workspace/workspaceSlice";
 
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    workspace: workspaceReducer,
+  },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
